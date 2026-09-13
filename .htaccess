@@ -1,0 +1,40 @@
+Options -Indexes
+RewriteEngine On
+
+# Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+)$ $1.php [L,QSA]
+
+# Clean product URLs
+RewriteRule ^product/([0-9]+)/?$ /product.php?id=$1 [L,QSA]
+
+# Block direct access to includes folder
+RewriteRule ^includes/ - [F,L]
+
+# Custom 404
+ErrorDocument 404 /404.php
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "(config\.php|database\.sql|\.env|README\.txt|php\.ini)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/png  "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType text/css   "access plus 1 week"
+  ExpiresByType text/javascript "access plus 1 week"
+</IfModule>
